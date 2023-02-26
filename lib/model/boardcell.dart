@@ -4,7 +4,11 @@ class BoardCell {
   bool isMerged = false;
   bool isNew = false;
 
-  BoardCell({this.row, this.column, this.number, this.isNew});
+  BoardCell(
+      {required this.row,
+      required this.column,
+      required this.number,
+      required this.isNew});
 
   bool isEmpty() {
     return number == 0;

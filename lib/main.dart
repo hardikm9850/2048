@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hardik_2048/utils/constants.dart';
 
-import 'screen/game.dart';
+import 'screen/game_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -40,7 +41,6 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: const Game(),
-      // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:hardik_2048/widgets/tiles.dart';
+import 'package:hardik_2048/widgets/tiles_widget.dart';
 
-import '../utils/constants.dart';
+import '../model/boardcell.dart';
 
 class BoardWidget extends StatefulWidget {
   final double tileSize;
   final double margin;
+  final List<List<BoardCell>> tiles;
 
-  const BoardWidget({Key? key, required this.tileSize, required this.margin})
+  const BoardWidget({Key? key,
+    required this.tiles,
+    required this.tileSize,
+    required this.margin,
+    })
       : super(key: key);
 
   @override
@@ -22,24 +27,24 @@ class _BoardWidgetState extends State<BoardWidget> {
     queryData = MediaQuery.of(context);
 
     return AspectRatio(
-        aspectRatio: 1,
-        child: Container(
-          width: _getSize(),
-          height: _getSize(),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(6.0),
-            color: boxBackground,
-          ),
-          child: SizedBox(
-            child: Stack(children: [
-              Tiles(widget.tileSize, widget.margin),
-            ]),
-          ),
-        )
+      aspectRatio: 1,
+      child: Container(
+        width: _getBoardSize(),
+        height: _getBoardSize(),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(6.0),
+        ),
+        child: SizedBox(
+          child: Stack(children: [
+            Tiles(widget.tileSize, widget.margin, widget.tiles),
+          ]),
+        ),
+      ),
     );
+
   }
 
-  double _getSize() {
+  double _getBoardSize() {
     double width = queryData.size.width;
     double height = queryData.size.height;
     if (width > height) {

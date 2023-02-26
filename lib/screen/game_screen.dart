@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:hardik_2048/widgets/tiles.dart';
+import 'package:flutter_swipe_detector/flutter_swipe_detector.dart';
 
+import '../controller/gamecontrol.dart';
 import '../utils/constants.dart';
-import '../widgets/board.dart';
-
+import '../widgets/board_widget.dart';
+//1, 3, => 2,  3, 3, => 2,
 class Game extends StatefulWidget {
   const Game({Key? key}) : super(key: key);
 
@@ -12,54 +13,82 @@ class Game extends StatefulWidget {
 }
 
 class _GameState extends State<Game> {
-  late double tileSize;
+
+  late GameController _gameController;
+
+  @override
+  void initState() {
+    super.initState();
+    _gameController = GameController();
+    _gameController.init();
+  }
 
   @override
   Widget build(BuildContext context) {
     MediaQueryData queryData = MediaQuery.of(context);
-    double boardSize = queryData.size.width - 4.0 * 2;
-    tileSize = (boardSize - 8.0) / 5;
+    double boardSize = queryData.size.width - 20.0 * 2;
+    var tileSize = (boardSize - 8.0) / 5;
     var margin = (boardSize / 5) / 5;
 
     return Column(
       children: [
         Expanded(
             child: Container(
-          color: screenBackground,
-          child: Column(
-            children: [
-              Container(
-                  margin:
-                      const EdgeInsets.symmetric(vertical: 15.0, horizontal: 8),
-                  child: AspectRatio(
-                      aspectRatio: 1,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(6.0),
-                          color: boxBackground,
-                        ),
-                        child: BoardWidget(
-                          tileSize: tileSize,
-                          margin: margin,
-                        ),
-                      )
-                  )
-              )
-            ],
-          ),
-        ))
+              child: SwipeDetector(
+                onSwipe: (direction,offset){
+                  setState(() {
+                    onSwipedDetected(direction);
+                  });
+                },
+                child: Column(
+                  children: [
+                    Container(
+                        margin:
+                        const EdgeInsets.symmetric(vertical: 20.0, horizontal: 22),
+                        child: AspectRatio(
+                            aspectRatio: 1,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(6.0),
+                                color: boardBackground,
+                              ),
+                              child: BoardWidget(
+                                tiles: _gameController.boardCells,
+                                tileSize: tileSize,
+                                margin: margin,
+                              ),
+                            )
+                        )
+                    ),
+                    Text("Score : ${_gameController.score}"),
+                    ElevatedButton(onPressed:(){
+                      setState(() {
+                        _gameController.reset();
+                      });
+                    } , child: const Text("Reset"))
+                  ],
+                ),
+              ),
+            ))
       ],
     );
   }
 
-  double _getSize() {
-    MediaQueryData queryData = MediaQuery.of(context);
-    double width = queryData.size.width;
-    double height = queryData.size.height;
-    if (width > height) {
-      //web
-      return height - 200;
+  void onSwipedDetected(SwipeDirection direction) {
+    print("swipe ${direction.name}");
+    switch(direction){
+      case SwipeDirection.up :
+        _gameController.moveUp();
+        break;
+      case SwipeDirection.down:
+        _gameController.moveDown();
+        break;
+      case SwipeDirection.left:
+        _gameController.moveLeft();
+        break;
+      case SwipeDirection.right:
+        _gameController.moveRight();
+        break;
     }
-    return width;
   }
 }
