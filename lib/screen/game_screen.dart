@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hardik_2048/widgets/tiles.dart';
 
 import '../utils/constants.dart';
+import '../widgets/board.dart';
 
 class Game extends StatefulWidget {
   const Game({Key? key}) : super(key: key);
@@ -37,14 +38,13 @@ class _GameState extends State<Game> {
                           borderRadius: BorderRadius.circular(6.0),
                           color: boxBackground,
                         ),
-                        child: SizedBox(
-                          width: _getSize(),
-                          height: _getSize(),
-                          child: Stack(children: [
-                            Tiles(tileSize, margin),
-                          ]),
+                        child: BoardWidget(
+                          tileSize: tileSize,
+                          margin: margin,
                         ),
-                      )))
+                      )
+                  )
+              )
             ],
           ),
         ))
