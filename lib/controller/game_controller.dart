@@ -1,33 +1,34 @@
 import 'dart:math' show Random;
 
+import 'package:hardik_2048/model/snapshot.dart';
+
 import '../model/boardcell.dart';
+import '../storage/data_manager.dart';
 
 class GameController {
   final int row = 4;
   final int column = 4;
-  int score = 0;
+  int _score = 0;
+  int highScore = 0;
+  bool _isGameOver = false;
+  bool _isGameWon = false;
+
+  late DataManager dataManager;
+  late Snapshot snapshot;
   late List<List<BoardCell>> _boardCells;
 
   GameController();
 
-  get boardCells => _boardCells;
-
   void init() {
-    _boardCells = <List<BoardCell>>[];
-    for (int r = 0; r < row; r++) {
-      _boardCells.add(<BoardCell>[]);
-      for (int c = 0; c < column; c++) {
-        _boardCells[r].add(BoardCell(
-          row: r,
-          column: c,
-          number: 0,
-          isNew: false,
-        ));
-      }
-    }
-    score = 0;
-    resetMergeStatus();
-    randomEmptyCell(2);
+    _isGameWon = _isGameOver = false;
+    _score = 0;
+
+    snapshot = Snapshot();
+    _initialiseDataManager();
+    _initialiseBoard();
+    _resetMergeStatus();
+    _randomEmptyCell(2);
+    snapshot.saveGameState(_score, highScore, _boardCells);
   }
 
   BoardCell get(int r, int c) {
@@ -35,6 +36,7 @@ class GameController {
   }
 
   void moveLeft() {
+    snapshot.saveGameState(_score, highScore, _boardCells);
     if (!canMoveLeft()) {
       return;
     }
@@ -43,11 +45,12 @@ class GameController {
         mergeLeft(r, c);
       }
     }
-    randomEmptyCell(1);
-    resetMergeStatus();
+    _resetMergeStatus();
+    _randomEmptyCell(1);
   }
 
   void moveRight() {
+    snapshot.saveGameState(_score, highScore, _boardCells);
     if (!canMoveRight()) {
       return;
     }
@@ -56,11 +59,12 @@ class GameController {
         mergeRight(r, c);
       }
     }
-    randomEmptyCell(1);
-    resetMergeStatus();
+    _resetMergeStatus();
+    _randomEmptyCell(1);
   }
 
   void moveUp() {
+    snapshot.saveGameState(_score, highScore, _boardCells);
     if (!canMoveUp()) {
       return;
     }
@@ -69,11 +73,12 @@ class GameController {
         mergeUp(r, c);
       }
     }
-    randomEmptyCell(1);
-    resetMergeStatus();
+    _resetMergeStatus();
+    _randomEmptyCell(1);
   }
 
   void moveDown() {
+    snapshot.saveGameState(_score, highScore, _boardCells);
     if (!canMoveDown()) {
       return;
     }
@@ -82,8 +87,8 @@ class GameController {
         mergeDown(r, c);
       }
     }
-    randomEmptyCell(1);
-    resetMergeStatus();
+    _resetMergeStatus();
+    _randomEmptyCell(1);
   }
 
   bool canMoveLeft() {
@@ -159,12 +164,6 @@ class GameController {
   }
 
   bool canMerge(BoardCell a, BoardCell b) {
-    /*print(
-        "a= ${a.number} row ${a.row} col ${a.column}, b= ${b.number} row ${b.row} col ${b.column}");
-    print("is b merged ${!b.isMerged}");
-    print("second cond ${((b.isEmpty() && !a.isEmpty()))}");
-    print("third cond ${(!a.isEmpty() && a == b)}");*/
-
     return !b.isMerged &&
         ((b.isEmpty() && !a.isEmpty()) || (!a.isEmpty() && a == b));
   }
@@ -182,18 +181,28 @@ class GameController {
     } else if (a == b) {
       b.number = b.number * 2;
       a.number = 0;
-      score += b.number;
+      _score += b.number;
       b.isMerged = true;
     } else {
       b.isMerged = true;
     }
+    setHighScore();
+    _checkIfGameWon(b.number);
   }
 
-  bool isGameOver() {
-    return !canMoveLeft() && !canMoveRight() && !canMoveUp() && !canMoveDown();
+  void checkIfIsGameOver() {
+    var left = canMoveLeft();
+    var right = canMoveRight();
+    var top = canMoveUp();
+    var down = canMoveDown();
+    _isGameOver = (left || right || top || down) == false;
   }
 
-  void randomEmptyCell(int cnt) {
+  bool isGameOver(){
+    return _isGameOver;
+  }
+
+  void _randomEmptyCell(int cnt) {
     List<BoardCell> emptyCells = <BoardCell>[];
     _boardCells.forEach((cells) {
       emptyCells.addAll(cells.where((cell) {
@@ -201,6 +210,7 @@ class GameController {
       }));
     });
     if (emptyCells.isEmpty) {
+      checkIfIsGameOver();
       return;
     }
     Random r = Random();
@@ -208,17 +218,9 @@ class GameController {
       int index = r.nextInt(emptyCells.length);
       emptyCells[index].number = randomCellNum();
       emptyCells[index].isNew = true;
-      //print("empty cell index $index");
-      //emptyCells.removeAt(index);
+      emptyCells[index].isMerged = false;
     }
-    _boardCells.forEach((element) {
-      element.forEach((element) {
-        if (element.number != 0) {
-          /*print(
-              "## number ${element.number} row ${element.row} column ${element.column}");*/
-        }
-      });
-    });
+    checkIfIsGameOver();
   }
 
   int randomCellNum() {
@@ -226,7 +228,7 @@ class GameController {
     return r.nextInt(15) == 0 ? 4 : 2;
   }
 
-  void resetMergeStatus() {
+  void _resetMergeStatus() {
     for (var cells in _boardCells) {
       for (var cell in cells) {
         cell.isMerged = false;
@@ -234,14 +236,72 @@ class GameController {
     }
   }
 
-  void reset(){
+  void reset() {
     _boardCells.clear();
-    resetMergeStatus();
-    score = 0;
+    _resetMergeStatus();
+    _score = 0;
     init();
   }
+
+  void undo(){
+    var previousState = snapshot.revertState();
+    _score = previousState[SnapshotKeys.SCORE] as int;
+    highScore = previousState[SnapshotKeys.HIGH_SCORE] as int;
+    _isGameOver = false;
+    _isGameWon = false;
+    var cells = previousState[SnapshotKeys.BOARD];
+    if(cells != null && cells is List<List<BoardCell>>) {
+      List<List<BoardCell>> temp = [...cells];
+      _boardCells.clear();
+      _boardCells.addAll(temp);
+    }
+  }
+
+  Future<void> _initialiseDataManager() async {
+      dataManager = DataManager();
+      highScore = await dataManager.getValue(StorageKeys.highScore) as int;
+  }
+
+  void setHighScore() {
+    if (_score > highScore) {
+      highScore = _score;
+      dataManager.setValue(StorageKeys.highScore, highScore.toString());
+    }
+  }
+
+  void _initialiseBoard() {
+    _boardCells = <List<BoardCell>>[];
+    for (int r = 0; r < row; r++) {
+      _boardCells.add(<BoardCell>[]);
+      for (int c = 0; c < column; c++) {
+        _boardCells[r].add(BoardCell(
+          row: r,
+          column: c,
+          number: 0,
+          isNew: false,
+        ));
+      }
+    }
+  }
+
+  void _checkIfGameWon(int number) {
+    _isGameWon = number == 16;
+    print("is game won? ${_isGameWon}");
+  }
+
+  bool isGameWon(){
+    return _isGameWon;
+  }
+
+  String getScore(){
+    return _score.toString();
+  }
+
+  String getHighScore(){
+    return highScore.toString();
+  }
+
+  List<List<BoardCell>> getBoardCells(){
+    return _boardCells;
+  }
 }
-/*
-I/flutter (20747): 0, 3, => 2
-I/flutter (20747): 3, 1, => 2
- */

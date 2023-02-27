@@ -1,83 +1,118 @@
+import 'dart:math';
+
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_swipe_detector/flutter_swipe_detector.dart';
 
-import '../controller/gamecontrol.dart';
-import '../utils/constants.dart';
+import '../controller/game_controller.dart';
 import '../widgets/board_widget.dart';
-//1, 3, => 2,  3, 3, => 2,
-class Game extends StatefulWidget {
-  const Game({Key? key}) : super(key: key);
+import '../widgets/celebration_widget.dart';
+import '../widgets/game_actionable_widget.dart';
+import '../widgets/game_over_widget.dart';
+import '../widgets/score_board_widget.dart';
+
+class GameScreen extends StatefulWidget {
+  const GameScreen({Key? key}) : super(key: key);
 
   @override
-  State<Game> createState() => _GameState();
+  State<GameScreen> createState() => _GameScreenState();
 }
 
-class _GameState extends State<Game> {
-
+class _GameScreenState extends State<GameScreen> {
   late GameController _gameController;
+  late ConfettiController _animationController;
+  var lastKeyStrokeTime = DateTime.now().millisecondsSinceEpoch;
 
   @override
   void initState() {
     super.initState();
     _gameController = GameController();
+    _animationController =
+        ConfettiController(duration: const Duration(seconds: 10));
     _gameController.init();
   }
 
   @override
   Widget build(BuildContext context) {
-    MediaQueryData queryData = MediaQuery.of(context);
-    double boardSize = queryData.size.width - 20.0 * 2;
-    var tileSize = (boardSize - 8.0) / 5;
-    var margin = (boardSize / 5) / 5;
+    var commentWidgets = <Widget>[];
+    if (_gameController.isGameWon()) {
+      commentWidgets
+          .add(CelebrationWidget(animationController: _animationController));
+      _animationController.play();
+    } else {
+      commentWidgets.clear();
+    }
 
-    return Column(
-      children: [
-        Expanded(
-            child: Container(
-              child: SwipeDetector(
-                onSwipe: (direction,offset){
-                  setState(() {
-                    onSwipedDetected(direction);
-                  });
-                },
-                child: Column(
-                  children: [
-                    Container(
-                        margin:
-                        const EdgeInsets.symmetric(vertical: 20.0, horizontal: 22),
-                        child: AspectRatio(
-                            aspectRatio: 1,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(6.0),
-                                color: boardBackground,
-                              ),
-                              child: BoardWidget(
-                                tiles: _gameController.boardCells,
-                                tileSize: tileSize,
-                                margin: margin,
-                              ),
-                            )
-                        )
-                    ),
-                    Text("Score : ${_gameController.score}"),
-                    ElevatedButton(onPressed:(){
-                      setState(() {
-                        _gameController.reset();
-                      });
-                    } , child: const Text("Reset"))
-                  ],
-                ),
+    return RawKeyboardListener(
+        autofocus: true,
+        focusNode: FocusNode(),
+        onKey: (event) {
+          handleKeyEvent(event);
+        },
+        child: Column(
+          children: [
+            Expanded(
+                child: SwipeDetector(
+              onSwipe: (direction, offset) {
+                setState(() {
+                  onSwipedDetected(direction);
+                });
+              },
+              child: Stack(
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      const SizedBox(
+                        height: 40,
+                      ),
+                      ScoreBoardWidget(
+                          highestScore: _gameController.getHighScore(),
+                          key: null),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      GameBoardWidget(
+                        tiles: _gameController.getBoardCells(),
+                      ),
+                      const SizedBox(height: 20),
+                      GameActionableWidget(
+                        onUndoPressed: () {
+                          setState(() {
+                            _animationController.stop();
+                            _gameController.undo();
+                          });
+                        },
+                        onNewGamePressed: () {
+                          setState(() {
+                            _animationController.stop();
+                            _gameController.reset();
+                          });
+                        },
+                        score: _gameController.getScore(),
+                        isGameOver: _gameController.isGameOver(),
+                      ),
+                    ],
+                  ),
+                  GameOverWidget(
+                      shouldShow: _gameController.isGameOver(),
+                      callback: () {
+                        setState(() {
+                          _gameController.reset();
+                        });
+                      }),
+                  ...commentWidgets
+                ],
               ),
             ))
-      ],
-    );
+          ],
+        ));
   }
 
   void onSwipedDetected(SwipeDirection direction) {
-    print("swipe ${direction.name}");
-    switch(direction){
-      case SwipeDirection.up :
+    switch (direction) {
+      case SwipeDirection.up:
         _gameController.moveUp();
         break;
       case SwipeDirection.down:
@@ -89,6 +124,30 @@ class _GameState extends State<Game> {
       case SwipeDirection.right:
         _gameController.moveRight();
         break;
+    }
+  }
+
+  void handleKeyEvent(RawKeyEvent event) {
+    var currentKeyStrokeTime = DateTime.now().millisecondsSinceEpoch;
+    if(currentKeyStrokeTime - lastKeyStrokeTime < 5) {
+      lastKeyStrokeTime = currentKeyStrokeTime;
+      return;
+    }
+    lastKeyStrokeTime = currentKeyStrokeTime;
+    SwipeDirection? direction;
+    if(event.isKeyPressed(LogicalKeyboardKey.arrowUp)){
+      direction = SwipeDirection.up;
+    } else if(event.isKeyPressed(LogicalKeyboardKey.arrowDown)){
+      direction = SwipeDirection.down;
+    } else if(event.isKeyPressed(LogicalKeyboardKey.arrowLeft)){
+      direction = SwipeDirection.left;
+    } else if(event.isKeyPressed(LogicalKeyboardKey.arrowRight)){
+      direction = SwipeDirection.right;
+    }
+    if(direction != null) {
+      setState(() {
+        onSwipedDetected(direction!);
+      });
     }
   }
 }

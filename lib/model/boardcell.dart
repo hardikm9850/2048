@@ -23,4 +23,9 @@ class BoardCell {
   bool operator ==(other) {
     return other is BoardCell && number == other.number;
   }
+
+  @override
+  String toString() {
+    return number.toString();
+  }
 }
