@@ -285,8 +285,7 @@ class GameController {
   }
 
   void _checkIfGameWon(int number) {
-    _isGameWon = number == 16;
-    print("is game won? ${_isGameWon}");
+    _isGameWon = number == 2048;
   }
 
   bool isGameWon(){
