@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:hardik_2048/model/boardcell.dart';
 
 import 'cell_widget.dart';
@@ -6,18 +8,18 @@ import 'cell_widget.dart';
 class GridWidget extends StatelessWidget {
   final double tileSize;
   final double margin;
-  final List<List<BoardCell>> tiles;
+  final RxList<RxList<Rx<BoardCell>>> tiles;
 
   const GridWidget(this.tileSize, this.margin, this.tiles, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    return Obx(() => Stack(
       children: createList(
         tileSize,
         margin,
       ),
-    );
+    ));
   }
 
   List<Widget> createList(double tileSize, double margin) {
@@ -25,7 +27,8 @@ class GridWidget extends StatelessWidget {
 
     for (int i = 0; i < 4; i++) {
       for (int j = 0; j < 4; j++) {
-        var cell = tiles[i][j];
+        var cell = tiles[i][j].value;
+
         list.add(CellWidget(
             left: cell.row,
             top: cell.column,

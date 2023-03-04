@@ -7,7 +7,7 @@ import 'score_board_widget.dart';
 class GameActionableWidget extends StatefulWidget {
   final VoidCallback onUndoPressed;
   final VoidCallback onNewGamePressed;
-  final String score;
+  final int score;
   final bool isGameOver;
 
   const GameActionableWidget(
@@ -37,7 +37,7 @@ class _GameActionableWidgetState extends State<GameActionableWidget> {
           backgroundColor: scoreBackground,
         ),
         const SizedBox(width: 18),
-        Score(label: 'Score', score: widget.score),
+        Score(label: 'Score', score: widget.score.toString()),
         const SizedBox(width: 18),
         ButtonWidget(
           icon: Icons.refresh,

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_navigation/src/root/get_material_app.dart';
 
 
+import 'binding/GameControllerBinding.dart';
 import 'screen/game_screen.dart';
 
 void main() {
@@ -12,8 +14,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: '2048',
+      initialBinding: ConfigurationBinding(),
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -35,7 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return  Scaffold(
       body: GameScreen(),
     );
   }

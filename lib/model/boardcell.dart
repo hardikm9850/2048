@@ -26,6 +26,6 @@ class BoardCell {
 
   @override
   String toString() {
-    return number.toString();
+    return "$number row $row column $column";
   }
 }
