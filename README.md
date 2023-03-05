@@ -19,3 +19,19 @@ I was fascinated by Flutter's ability to support cross platform and I wanted to 
 1. Stats (number of moves, time played, etc)
 2. Work on the animations (there's no animation for shifting tiles along the board at the moment)
 
+### 📸 Screenshot
+
+* MacOS
+
+
+<img width="500" alt="2048_macos" src="https://user-images.githubusercontent.com/16346765/222961274-efdcf70c-5983-4507-9c9a-88a6a718c633.png">
+
+
+
+
+* Mobile
+
+
+<img width="350" height = "700" alt="2048_mobile" src="https://user-images.githubusercontent.com/16346765/222961245-049a6d25-60b8-491b-af6f-018110cdc62a.png">
+
+
