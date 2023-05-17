@@ -3,7 +3,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:hardik_2048/widgets/tiles_widget.dart';
 
 import '../model/boardcell.dart';

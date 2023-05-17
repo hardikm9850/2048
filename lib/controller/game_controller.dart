@@ -1,7 +1,6 @@
 import 'dart:math' show Random;
 
 import 'package:get/get.dart';
-import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:hardik_2048/model/snapshot.dart';
 
 import '../model/boardcell.dart';
@@ -218,10 +217,10 @@ class GameController extends GetxController {
   void _randomEmptyCell(int cnt) {
     List<BoardCell> emptyCells = <BoardCell>[];
 
-    reactiveBoardCells.forEach((element) {
+    for (var element in reactiveBoardCells) {
       var ans = element.value.where((element) => element.value.isEmpty());
       emptyCells.addAll(ans.map((e) => e.value));
-    });
+    }
     if (emptyCells.isEmpty) {
       checkIfIsGameOver();
       return;

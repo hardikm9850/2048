@@ -1,11 +1,9 @@
-import 'dart:math';
 
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_swipe_detector/flutter_swipe_detector.dart';
 import 'package:get/get.dart';
-import 'package:get/get_state_manager/src/simple/get_view.dart';
 
 import '../controller/game_controller.dart';
 import '../widgets/board_widget.dart';
@@ -129,7 +127,7 @@ class GameScreen extends GetView<GameController> {
       direction = SwipeDirection.right;
     }
     if (direction != null) {
-      onSwipedDetected(direction!);
+      onSwipedDetected(direction);
     }
   }
 }
