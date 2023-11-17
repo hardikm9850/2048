@@ -53,6 +53,7 @@ class GameScreen extends GetView<GameController> {
                       ),
                       Obx(() => ScoreBoardWidget(
                           highestScore: controller.highScore.value.toString(),
+                          numberOfMoves: controller.numberOfMoves.value.toString(),
                           key: null)),
                       const SizedBox(
                         height: 20,

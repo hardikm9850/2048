@@ -4,19 +4,25 @@ import '../utils/colorUtils.dart';
 
 class ScoreBoardWidget extends StatelessWidget {
   final String highestScore;
+  final String numberOfMoves;
 
-  const ScoreBoardWidget({required this.highestScore, super.key});
+  const ScoreBoardWidget({required this.highestScore,required this.numberOfMoves, super.key});
 
   @override
   Widget build(BuildContext context) {
 
     return Row(
 
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         Score(
             label: 'Best',
             score: highestScore,
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0)),
+        Score(
+            label: 'Moves',
+            score: numberOfMoves,
             padding:
                 const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0)),
       ],
