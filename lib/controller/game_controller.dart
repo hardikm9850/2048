@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' show Random;
 
 import 'package:get/get.dart';
@@ -7,6 +8,7 @@ import '../model/boardcell.dart';
 import '../storage/data_manager.dart';
 
 class GameController extends GetxController {
+
   final int row = 4;
   final int column = 4;
   var score = 0.obs;
@@ -20,6 +22,10 @@ class GameController extends GetxController {
   final reactiveBoardCells = <RxList<Rx<BoardCell>>>[].obs;
   final list = <Rx<BoardCell>>[].obs;
 
+  static const String _defaultInitialTimerValue = '0';
+  late Timer _timerObj;
+  var timer = _defaultInitialTimerValue.obs;
+  
   @override
   void onInit() {
     init();
@@ -30,6 +36,7 @@ class GameController extends GetxController {
     isGameWon.value = isGameOver.value = false;
     score.value = 0;
     numberOfMoves.value = 0;
+    timer.value = '0';
 
     snapshot = Snapshot();
     _initialiseDataManager();
@@ -38,6 +45,7 @@ class GameController extends GetxController {
     _randomEmptyCell(2);
     _saveSnapShot();
   }
+
 
   void _saveSnapShot() {
     snapshot.saveGameState(
@@ -230,7 +238,7 @@ class GameController extends GetxController {
     var down = canMoveDown();
     isGameOver.value = (left || right || top || down) == false;
     isGameOver.refresh();
-    print("is game over? ${isGameOver.value}");
+    // ramzi print("is game over? ${isGameOver.value}");
   }
 
   void _randomEmptyCell(int cnt) {
@@ -282,6 +290,7 @@ class GameController extends GetxController {
     reactiveBoardCells.clear();
     _resetMergeStatus();
     score.value = 0;
+    resetTimer();
     init();
   }
 
@@ -347,5 +356,23 @@ class GameController extends GetxController {
 
   String getScore() {
     return score.toString();
+  }
+
+
+  void startTimer() {
+    if(timer.value == _defaultInitialTimerValue) {
+      _timerObj = Timer.periodic(const Duration(seconds: 1), (_) {
+        timer.value = (int.parse(timer.value) + 1).toString();
+      });
+    }
+  }
+
+  void stopTimer() {
+    _timerObj.cancel();
+  }
+
+  void resetTimer() {
+    stopTimer();
+    timer.value = _defaultInitialTimerValue;
   }
 }

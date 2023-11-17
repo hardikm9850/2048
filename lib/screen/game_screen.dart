@@ -1,4 +1,3 @@
-
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -51,12 +50,9 @@ class GameScreen extends GetView<GameController> {
                       const SizedBox(
                         height: 40,
                       ),
-                      Obx(() => ScoreBoardWidget(
-                          highestScore: controller.highScore.value.toString(),
-                          numberOfMoves: controller.numberOfMoves.value.toString(),
-                          key: null)),
+                      ScoreBoardWidget(),
                       const SizedBox(
-                        height: 20,
+                        height: 5,
                       ),
                       SwipeDetector(
                           onSwipe: (direction, offset) {
@@ -94,6 +90,7 @@ class GameScreen extends GetView<GameController> {
   }
 
   void onSwipedDetected(SwipeDirection direction) {
+    controller.startTimer();
     switch (direction) {
       case SwipeDirection.up:
         controller.moveUp();

@@ -1,31 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:hardik_2048/controller/game_controller.dart';
 
 import '../utils/colorUtils.dart';
 
 class ScoreBoardWidget extends StatelessWidget {
-  final String highestScore;
-  final String numberOfMoves;
+  final gameController = Get.find<GameController>();
 
-  const ScoreBoardWidget({required this.highestScore,required this.numberOfMoves, super.key});
+  ScoreBoardWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-
-    return Row(
-
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        Score(
-            label: 'Best',
-            score: highestScore,
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0)),
-        Score(
-            label: 'Moves',
-            score: numberOfMoves,
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0)),
-      ],
+    return Obx(
+      () => Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Score(
+                label: 'Best',
+                score: gameController.highScore.value.toString(),
+              ),
+              Score(
+                label: 'Moves',
+                score: gameController.numberOfMoves.value.toString(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 15),
+          Score(
+            label: 'Timer',
+            score: formatTimer(gameController.timer.value),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -42,9 +50,8 @@ class Score extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 100,
       padding: padding ??
-          const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
       decoration: BoxDecoration(
           color: scoreBackground, borderRadius: BorderRadius.circular(8.0)),
       child: Column(children: [
@@ -61,3 +68,19 @@ class Score extends StatelessWidget {
     );
   }
 }
+
+
+String formatTimer(String input) {
+  int seconds = int.parse(input);
+
+  int hours = seconds ~/ 3600;
+  int minutes = (seconds % 3600) ~/ 60;
+  int remainingSeconds = seconds % 60;
+
+  String hoursStr = hours.toString().padLeft(2, '0');
+  String minutesStr = minutes.toString().padLeft(2, '0');
+  String secondsStr = remainingSeconds.toString().padLeft(2, '0');
+
+  return '$hoursStr:$minutesStr:$secondsStr';
+}
+
