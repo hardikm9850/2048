@@ -8,7 +8,6 @@ import '../model/boardcell.dart';
 import '../storage/data_manager.dart';
 
 class GameController extends GetxController {
-
   final int row = 4;
   final int column = 4;
   var score = 0.obs;
@@ -24,8 +23,9 @@ class GameController extends GetxController {
 
   static const String _defaultInitialTimerValue = '0';
   late Timer _timerObj;
-  var timer = _defaultInitialTimerValue.obs;
-  
+  RxString timer = _defaultInitialTimerValue.obs;
+  bool _hasTimerStarted = false;
+
   @override
   void onInit() {
     init();
@@ -45,7 +45,6 @@ class GameController extends GetxController {
     _randomEmptyCell(2);
     _saveSnapShot();
   }
-
 
   void _saveSnapShot() {
     snapshot.saveGameState(
@@ -238,7 +237,7 @@ class GameController extends GetxController {
     var down = canMoveDown();
     isGameOver.value = (left || right || top || down) == false;
     isGameOver.refresh();
-    // ramzi print("is game over? ${isGameOver.value}");
+    print("is game over? ${isGameOver.value}");
   }
 
   void _randomEmptyCell(int cnt) {
@@ -358,9 +357,11 @@ class GameController extends GetxController {
     return score.toString();
   }
 
-
   void startTimer() {
-    if(timer.value == _defaultInitialTimerValue) {
+    if (timer.value == _defaultInitialTimerValue && !_hasTimerStarted) {
+      _hasTimerStarted = true;
+      print(
+          ' startTimer() startTimer()startTimer() startTimer()  startTimer()');
       _timerObj = Timer.periodic(const Duration(seconds: 1), (_) {
         timer.value = (int.parse(timer.value) + 1).toString();
       });
@@ -374,5 +375,6 @@ class GameController extends GetxController {
   void resetTimer() {
     stopTimer();
     timer.value = _defaultInitialTimerValue;
+    _hasTimerStarted = false;
   }
 }
