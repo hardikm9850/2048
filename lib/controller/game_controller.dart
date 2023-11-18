@@ -373,8 +373,10 @@ class GameController extends GetxController {
   }
 
   void resetTimer() {
-    stopTimer();
-    timer.value = _defaultInitialTimerValue;
-    _hasTimerStarted = false;
+    if (_hasTimerStarted) {
+      stopTimer();
+      timer.value = _defaultInitialTimerValue;
+      _hasTimerStarted = false;
+    }
   }
 }
