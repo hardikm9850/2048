@@ -6,15 +6,17 @@ import 'boardcell.dart';
 class Snapshot {
   int _score = 0;
   int _highScore = 0;
+  int _numberOfMoves = 0;
   var cells = <List<BoardCell>>[];
 
   void saveGameState(
-      int score, int highScore, RxList<RxList<Rx<BoardCell>>> boardCells) {
+      int score, int highScore, int numberOfMoves, RxList<RxList<Rx<BoardCell>>> boardCells) {
     if (!isAnyCellEmpty(boardCells)) {
       return;
     }
     _score = score;
     _highScore = highScore;
+    _numberOfMoves = numberOfMoves;
     storeList(boardCells);
   }
 
@@ -22,7 +24,8 @@ class Snapshot {
     var result = {
       SnapshotKeys.SCORE: _score,
       SnapshotKeys.HIGH_SCORE: _highScore,
-      SnapshotKeys.BOARD: cells
+      SnapshotKeys.BOARD: cells,
+      SnapshotKeys.NUMBER_OF_MOVES: _numberOfMoves
     };
     return result;
   }
@@ -84,4 +87,5 @@ class SnapshotKeys {
   static String SCORE = "score";
   static String HIGH_SCORE = "high_score";
   static String BOARD = "board";
+  static String NUMBER_OF_MOVES = "number_of_moves";
 }

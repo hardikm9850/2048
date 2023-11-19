@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' show Random;
 
 import 'package:get/get.dart';
@@ -11,6 +12,7 @@ class GameController extends GetxController {
   final int column = 4;
   var score = 0.obs;
   var highScore = 0.obs;
+  var numberOfMoves = 0.obs;
   var isGameOver = false.obs;
   var isGameWon = false.obs;
 
@@ -18,6 +20,11 @@ class GameController extends GetxController {
   late Snapshot snapshot;
   final reactiveBoardCells = <RxList<Rx<BoardCell>>>[].obs;
   final list = <Rx<BoardCell>>[].obs;
+
+  static const String _defaultInitialTimerValue = '0';
+  late Timer _timerObj;
+  RxString timer = _defaultInitialTimerValue.obs;
+  bool _hasTimerStarted = false;
 
   @override
   void onInit() {
@@ -28,20 +35,36 @@ class GameController extends GetxController {
   void init() {
     isGameWon.value = isGameOver.value = false;
     score.value = 0;
+    numberOfMoves.value = 0;
+    timer.value = '0';
 
     snapshot = Snapshot();
     _initialiseDataManager();
     _initialiseBoard();
     _resetMergeStatus();
     _randomEmptyCell(2);
-    snapshot.saveGameState(score.value, highScore.value, reactiveBoardCells);
+    _saveSnapShot();
+  }
+
+  void _saveSnapShot() {
+    snapshot.saveGameState(
+      score.value,
+      highScore.value,
+      numberOfMoves.value,
+      reactiveBoardCells,
+    );
+  }
+
+  void _incrementNumberOfMoves() {
+    numberOfMoves.value++;
   }
 
   void moveLeft() {
-    snapshot.saveGameState(score.value, highScore.value, reactiveBoardCells);
+    _saveSnapShot();
     if (!canMoveLeft()) {
       return;
     }
+    _incrementNumberOfMoves();
     for (int r = 0; r < row; ++r) {
       for (int c = 0; c < column; ++c) {
         mergeLeft(r, c);
@@ -52,10 +75,11 @@ class GameController extends GetxController {
   }
 
   void moveRight() {
-    snapshot.saveGameState(score.value, highScore.value, reactiveBoardCells);
+    _saveSnapShot();
     if (!canMoveRight()) {
       return;
     }
+    _incrementNumberOfMoves();
     for (int r = 0; r < row; ++r) {
       for (int c = column - 2; c >= 0; --c) {
         mergeRight(r, c);
@@ -66,10 +90,11 @@ class GameController extends GetxController {
   }
 
   void moveUp() {
-    snapshot.saveGameState(score.value, highScore.value, reactiveBoardCells);
+    _saveSnapShot();
     if (!canMoveUp()) {
       return;
     }
+    _incrementNumberOfMoves();
     for (int r = 0; r < row; ++r) {
       for (int c = 0; c < column; ++c) {
         mergeUp(r, c);
@@ -80,10 +105,11 @@ class GameController extends GetxController {
   }
 
   void moveDown() {
-    snapshot.saveGameState(score.value, highScore.value, reactiveBoardCells);
+    _saveSnapShot();
     if (!canMoveDown()) {
       return;
     }
+    _incrementNumberOfMoves();
     for (int r = row - 2; r >= 0; --r) {
       for (int c = 0; c < column; ++c) {
         mergeDown(r, c);
@@ -263,6 +289,7 @@ class GameController extends GetxController {
     reactiveBoardCells.clear();
     _resetMergeStatus();
     score.value = 0;
+    resetTimer();
     init();
   }
 
@@ -270,6 +297,7 @@ class GameController extends GetxController {
     var previousState = snapshot.revertState();
     score.value = previousState[SnapshotKeys.SCORE] as int;
     highScore.value = previousState[SnapshotKeys.HIGH_SCORE] as int;
+    numberOfMoves.value = previousState[SnapshotKeys.NUMBER_OF_MOVES] as int;
     isGameOver.value = false;
     isGameWon.value = false;
     var cells = previousState[SnapshotKeys.BOARD];
@@ -327,5 +355,28 @@ class GameController extends GetxController {
 
   String getScore() {
     return score.toString();
+  }
+
+  void startTimer() {
+    if (timer.value == _defaultInitialTimerValue && !_hasTimerStarted) {
+      _hasTimerStarted = true;
+      print(
+          ' startTimer() startTimer()startTimer() startTimer()  startTimer()');
+      _timerObj = Timer.periodic(const Duration(seconds: 1), (_) {
+        timer.value = (int.parse(timer.value) + 1).toString();
+      });
+    }
+  }
+
+  void stopTimer() {
+    _timerObj.cancel();
+  }
+
+  void resetTimer() {
+    if (_hasTimerStarted) {
+      stopTimer();
+      timer.value = _defaultInitialTimerValue;
+      _hasTimerStarted = false;
+    }
   }
 }
