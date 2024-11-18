@@ -16,7 +16,7 @@
 I was fascinated by Flutter's ability to support cross platform and I wanted to create something fun it. Then the thought of creating this game came up. The tiles move logic is copied from other 2048 game projects.
 
 ### ☑️ Todo
-1. ~~Stats (number of moves, time played, etc).~~ Done by [@Ramsay99](https://github.com/Ramsay99). Super Thanks 🙌🏼 
+1. ~~Stats (number of moves, time played, etc).~~ Done by [@Ramsay99](https://github.com/Ramsay99) in [this PR](https://github.com/hardikm9850/2048/pull/3). Super Thanks 🙌🏼 
 2. Work on the animations (there's no animation for shifting tiles along the board at the moment).
 
    UPD: [November 18, 2024: I'm currently focused on learning Golang and can't find time for this. I promise my future self to complete it soon.]
